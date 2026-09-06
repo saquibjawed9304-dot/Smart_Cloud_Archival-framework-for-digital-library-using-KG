@@ -1,11 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Smart Cloud Archival</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 </head>
+
 <body>
-    
+
+<header>
+
+    <div class="logo">
+        📚 Smart Cloud Archival
+    </div>
+
+    <div class="subtitle">
+        Knowledge Graph Digital Library
+    </div>
+
+</header>
+
+
+<main>
+
+    <section class="hero">
+
+        <h1>
+            Explore Knowledge,
+            <span>Not Just Keywords</span>
+        </h1>
+
+        <p>
+            Search books, authors, subjects and institutions
+            through a connected knowledge graph.
+        </p>
+
+        <div class="search-box">
+
+            <input
+                id="searchInput"
+                type="text"
+                placeholder="Search author, book, subject or institution..."
+            >
+
+            <button onclick="searchBooks()">
+                Search
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <section class="statistics">
+
+        <div class="stat-card">
+            <h2 id="bookCount">0</h2>
+            <p>Books</p>
+        </div>
+
+        <div class="stat-card">
+            <h2 id="authorCount">0</h2>
+            <p>Authors</p>
+        </div>
+
+        <div class="stat-card">
+            <h2 id="subjectCount">0</h2>
+            <p>Subjects</p>
+        </div>
+
+        <div class="stat-card">
+            <h2 id="institutionCount">0</h2>
+            <p>Institutions</p>
+        </div>
+
+    </section>
+
+
+    <section class="content">
+
+        <div class="panel">
+
+            <div class="panel-header">
+                <h2>Library Resources</h2>
+
+                <span id="resultCount">
+                    0 results
+                </span>
+            </div>
+
+            <div id="results">
+
+                <p class="empty">
+                    Search the library to see results.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="panel">
+
+            <div class="panel-header">
+                <h2>Knowledge Graph</h2>
+
+                <button onclick="loadGraph()">
+                    Refresh
+                </button>
+            </div>
+
+            <div id="graph"></div>
+
+        </div>
+
+    </section>
+
+
+    <section class="upload-section">
+
+        <div class="panel">
+
+            <h2>Document Processing</h2>
+
+            <p>
+                Upload a PDF to simulate the document
+                ingestion and text extraction pipeline.
+            </p>
+
+            <input
+                id="fileInput"
+                type="file"
+                accept=".pdf"
+            >
+
+            <button onclick="uploadDocument()">
+                Process Document
+            </button>
+
+            <pre id="uploadResult"></pre>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <p>
+        Smart Cloud Archival Framework |
+        AWS + AI + Knowledge Graph
+    </p>
+
+</footer>
+
+
+<script src="app.js"></script>
+
 </body>
+
 </html>
