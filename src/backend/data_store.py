@@ -1,30 +1,59 @@
 import csv
-from pathlib import Path
+from typing import Any
 
-from .config import DATASET_FILE
+from .config import DATASET_FILE, DATA_BACKEND, mysql_connection_config
 
 
-def load_books():
+def _load_csv_books() -> list[dict[str, Any]]:
     if not DATASET_FILE.exists():
         return []
 
     books = []
-
-    with open(DATASET_FILE, "r", encoding="utf-8") as file:
+    with open(DATASET_FILE, "r", encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)
+        required_fields = {"id", "title", "author", "subject", "institution", "language", "year"}
+        if not required_fields.issubset(reader.fieldnames or []):
+            raise ValueError("The library CSV is missing one or more required columns")
 
         for row in reader:
+            try:
+                year = int(row["year"]) if row["year"] else None
+            except ValueError:
+                year = None
             books.append({
-                "id": row["id"],
-                "title": row["title"],
-                "author": row["author"],
-                "subject": row["subject"],
-                "institution": row["institution"],
-                "language": row["language"],
-                "year": int(row["year"]) if row["year"] else None
+                "id": row["id"].strip(),
+                "title": row["title"].strip(),
+                "author": row["author"].strip(),
+                "subject": row["subject"].strip(),
+                "institution": row["institution"].strip(),
+                "language": row["language"].strip(),
+                "year": year,
             })
-
     return books
+
+
+def _mysql_books() -> list[dict[str, Any]]:
+    try:
+        import mysql.connector
+    except ImportError as error:
+        raise RuntimeError("mysql-connector-python is required when DATA_BACKEND=mysql") from error
+
+    connection = mysql.connector.connect(**mysql_connection_config())
+    try:
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT id, title, author, subject, institution, language, year "
+            "FROM books ORDER BY title"
+        )
+        return list(cursor.fetchall())
+    finally:
+        connection.close()
+
+
+def load_books():
+    if DATA_BACKEND == "mysql":
+        return _mysql_books()
+    return _load_csv_books()
 
 
 def search_books(query: str):

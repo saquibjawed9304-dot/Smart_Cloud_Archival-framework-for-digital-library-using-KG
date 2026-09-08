@@ -22,11 +22,12 @@
 <header>
 
     <div class="logo">
-        📚 Smart Cloud Archival
+        <span class="logo-mark">SA</span>
+        <span>Smart Archival</span>
     </div>
 
     <div class="subtitle">
-        Knowledge Graph Digital Library
+        Digital library intelligence
     </div>
 
 </header>
@@ -42,8 +43,8 @@
         </h1>
 
         <p>
-            Search books, authors, subjects and institutions
-            through a connected knowledge graph.
+            Search a living collection of books and discover the institutions,
+            subjects, authors, and languages connected to each record.
         </p>
 
         <div class="search-box">
@@ -54,7 +55,7 @@
                 placeholder="Search author, book, subject or institution..."
             >
 
-            <button onclick="searchBooks()">
+            <button id="searchButton" type="button">
                 Search
             </button>
 
@@ -68,6 +69,11 @@
         <div class="stat-card">
             <h2 id="bookCount">0</h2>
             <p>Books</p>
+        </div>
+
+        <div class="stat-card">
+            <h2 id="languageCount">0</h2>
+            <p>Languages</p>
         </div>
 
         <div class="stat-card">
@@ -100,9 +106,14 @@
                 </span>
             </div>
 
+            <div class="library-tabs" role="tablist" aria-label="Library resource type">
+                <button class="tab-button active" id="booksTab" type="button">Books</button>
+                <button class="tab-button" id="documentsTab" type="button">Uploaded PDFs</button>
+            </div>
+
             <div id="results">
 
-                <p class="empty">
+                <p class="empty" id="resultsMessage">
                     Search the library to see results.
                 </p>
 
@@ -116,12 +127,28 @@
             <div class="panel-header">
                 <h2>Knowledge Graph</h2>
 
-                <button onclick="loadGraph()">
+                <button id="refreshGraph" type="button">
                     Refresh
                 </button>
             </div>
 
             <div id="graph"></div>
+
+        </div>
+
+    </section>
+
+
+    <section class="pdf-viewer-section" id="pdfViewerSection" hidden>
+
+        <div class="panel pdf-viewer-panel">
+
+            <div class="panel-header">
+                <h2 id="pdfViewerTitle">Reading PDF</h2>
+                <button id="closePdfViewer" type="button">Close reader</button>
+            </div>
+
+            <iframe id="pdfViewer" title="PDF reader"></iframe>
 
         </div>
 
@@ -135,8 +162,8 @@
             <h2>Document Processing</h2>
 
             <p>
-                Upload a PDF to simulate the document
-                ingestion and text extraction pipeline.
+                Upload a PDF to validate the local ingestion pipeline. AWS mode
+                can route the same document through S3, Textract, and Bedrock.
             </p>
 
             <input
@@ -145,7 +172,7 @@
                 accept=".pdf"
             >
 
-            <button onclick="uploadDocument()">
+            <button id="uploadButton" type="button">
                 Process Document
             </button>
 

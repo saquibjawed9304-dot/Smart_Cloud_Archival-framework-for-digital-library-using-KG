@@ -5,3 +5,6 @@ pydantic
 pypdf
 boto3
 networkx
+mysql-connector-python
+pytest
+httpx
