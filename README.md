@@ -1,102 +1,94 @@
-# Smart Cloud Archival Framework for National Digital Libraries using Knowledge Graphs
+# Smart Cloud Archival Framework
 
-## Project Overview
-This project proposes a cloud-based archival framework for National Digital Libraries using Knowledge Graphs (KG) and Amazon Web Services (AWS). The framework transforms traditional metadata records into interconnected graph-based entities, enabling intelligent search, relationship discovery, multilingual entity linking, and secure access management.
+An academic digital-library prototype combining metadata search, a knowledge-graph view, PDF ingestion, and AWS integration points for S3, Textract, Bedrock, and Neptune.
 
-## Problem Statement
-Traditional digital libraries rely on flat metadata records, making it difficult to discover relationships between authors, subjects, institutions, and learning resources. This project addresses these limitations by using Knowledge Graphs and cloud-native services.
+## Current runtime
 
-## Objectives
-- Build a Knowledge Graph for digital library resources.
-- Improve semantic and relationship-based search.
-- Support multilingual entity linking.
-- Automate metadata extraction using AI services.
-- Implement secure authentication and access control.
-- Design a scalable cloud-native archival framework.
+- FastAPI backend serving the vanilla HTML/CSS/JavaScript dashboard
+- CSV fallback for zero-dependency demos
+- MySQL schema and seed workflow for local or RDS metadata storage
+- Deterministic local graph projection with stable node identifiers
+- PDF validation and local `pypdf` extraction
+- Opt-in AWS adapters for S3, asynchronous Textract, Claude on Bedrock, and Neptune
 
-## Technologies Used
-- AWS
-  - Amazon Neptune
-  - AWS Lambda
-  - Amazon Textract
-  - Amazon Comprehend
-  - Amazon Bedrock
-  - Amazon Cognito
-  - AWS IAM
-  - AWS KMS
-  - Amazon CloudWatch
-  - Amazon SNS
-- Knowledge Graphs
-- Graph Databases
-- OCR
-- Natural Language Processing (NLP)
-- Large Language Models (LLMs)
+AWS services are disabled unless their environment values are configured. The local test suite never needs AWS credentials.
 
-## Project Structure
+## Run locally with sample data
 
-```
-Smart_Agriculture_Cloud_Project_2026/ 
-│ 
-├── README.md 
-├── LICENSE 
-├── .gitignore 
-│ 
-├── docs/ 
-│   ├── Project_Report.docx 
-│   ├── Literature_Survey.docx 
-│   ├── Research_Gap.docx 
-│   ├── Objectives.docx 
-│   └── Novelty.docx 
-│ 
-├── architecture/ 
-│   ├── AWS_Architecture.png 
-│   ├── System_Architecture.png 
-│   └── Workflow.png 
-│ 
-├── dataset/ 
-│   ├── raw/ 
-│   ├── processed/ 
-│   └── dataset_description.pdf 
-│ 
-├── src/ 
-│   ├── frontend/ 
-│   ├── backend/ 
-│   ├── ml_model/ 
-│   └── aws/ 
-│ 
-├── results/ 
-│ 
-└── presentation/
+```powershell
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe -m uvicorn src.backend.main:app --reload
 ```
 
-## Features
-- Knowledge Graph-based metadata storage
-- Relationship-aware search
-- AI-assisted entity and relation extraction
-- Multilingual support
-- Secure user authentication
-- Role-based access control
-- Cloud-native scalable architecture
+Open `http://127.0.0.1:8000`. API documentation is at `http://127.0.0.1:8000/docs`.
 
-## Team Members
+The default `DATA_BACKEND=csv` uses `dataset/raw/library_records.csv`, which contains 12 sample records.
 
-- Sharad Panchal (24BIT0405)
-- Mohammad Saquib (24BIT0297)
+## Run with MySQL
 
-## Course Information
+Create a database in the existing MySQL installation, copy `.env.example` to `.env`, and set:
 
-**Course:** Project Phase-I  
-**Department:** B.Tech Information Technology  
-**Institution:** VIT University, Vellore  
-**Course Instructor:** Dr. Priya V
+```text
+DATA_BACKEND=mysql
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_DATABASE=smart_archival
+MYSQL_USER=root
+MYSQL_PASSWORD=your-password
+```
 
-## Future Scope
-- Real-time graph updates
-- Advanced semantic search
-- Recommendation system
-- Analytics dashboard
-- Integration with National Digital Library (NDLI)
+Load the schema and sample records:
 
-## License
+```powershell
+.venv\Scripts\python.exe -c "from src.backend.database import initialize_schema; initialize_schema()"
+.venv\Scripts\python.exe scripts\seed_data.py
+.venv\Scripts\python.exe -m uvicorn src.backend.main:app --reload
+```
 
-This project is developed for academic purposes at VIT University.
+The seed script is idempotent and can also be used against an RDS MySQL endpoint after networking and credentials are configured.
+
+## Verification
+
+```powershell
+.venv\Scripts\python.exe -m compileall src
+.venv\Scripts\python.exe -m pytest -q
+```
+
+The tests cover the CSV fallback, search/statistics, typed API responses, frontend serving, graph 404 behavior, and invalid/valid PDF handling.
+
+## AWS handoff
+
+Recommended topology:
+
+```text
+Browser -> EC2 / FastAPI -> RDS MySQL
+                       -> S3 -> async Textract
+                       -> Claude on Bedrock
+                       -> Neptune
+```
+
+For AWS mode:
+
+1. Place EC2, RDS, and Neptune in the intended VPC and restrict security groups to required application/database ports.
+2. Give the EC2 instance role least-privilege access to the S3 bucket, Textract jobs, Bedrock model invocation, and Neptune data APIs.
+3. Set `DATA_BACKEND=mysql`, RDS connection settings, `AWS_REGION`, `S3_BUCKET`, `NEPTUNE_ENDPOINT`, and an enabled Bedrock model ID.
+4. Run the schema and seed commands against RDS.
+5. Configure HTTPS through a reverse proxy or load balancer and set `ALLOWED_ORIGINS` to the real frontend origin.
+
+The AWS adapters are concrete service clients, but real cloud verification remains opt-in because it requires your account resources, model access, VPC routing, and IAM policies.
+
+## Project structure
+
+```text
+src/backend/       FastAPI routes, configuration, MySQL schema, data and graph services
+src/frontend/      Same-origin dashboard
+src/aws/           S3, Textract, Bedrock and Neptune adapters
+src/ml_model/      Deterministic extraction fallback
+dataset/raw/       Seed CSV records
+scripts/           Reproducible database seed command
+tests/             Local automated tests
+```
+
+## Academic context
+
+The project is developed for Project Phase-I at VIT University, Vellore. The documents in `docs/` contain the supporting report, literature survey, research gap, objectives, and novelty material.

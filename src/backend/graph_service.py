@@ -1,4 +1,10 @@
 from .data_store import load_books
+from fastapi import HTTPException
+
+
+def _node_id(node_type: str, label: str) -> str:
+    normalized = "-".join(label.casefold().split())
+    return f"{node_type.casefold()}:{normalized}"
 
 
 def build_graph():
@@ -20,11 +26,11 @@ def build_graph():
 
     for book in books:
 
-        book_id = f"book:{book['id']}"
-        author_id = f"author:{book['author']}"
-        subject_id = f"subject:{book['subject']}"
-        institution_id = f"institution:{book['institution']}"
-        language_id = f"language:{book['language']}"
+        book_id = _node_id("book", book["id"])
+        author_id = _node_id("author", book["author"])
+        subject_id = _node_id("subject", book["subject"])
+        institution_id = _node_id("institution", book["institution"])
+        language_id = _node_id("language", book["language"])
 
         add_node(book_id, book["title"], "Book")
         add_node(author_id, book["author"], "Author")
@@ -65,7 +71,10 @@ def build_graph():
 def get_book_graph(book_id: str):
     graph = build_graph()
 
-    target = f"book:{book_id}"
+    target = _node_id("book", book_id)
+
+    if target not in {node["id"] for node in graph["nodes"]}:
+        raise HTTPException(status_code=404, detail=f"Book '{book_id}' was not found")
 
     connected_ids = {target}
 

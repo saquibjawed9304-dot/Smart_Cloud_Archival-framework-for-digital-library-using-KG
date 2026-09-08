@@ -1,4 +1,6 @@
 import boto3
+from pathlib import Path
+from uuid import uuid4
 
 
 class S3Service:
@@ -11,15 +13,19 @@ class S3Service:
             region_name=region_name
         )
 
-    def upload_file(self, file_path, object_name=None):
+    def upload_file(self, file_path, object_name=None, content_type="application/pdf"):
 
         if object_name is None:
-            object_name = file_path.split("/")[-1]
+            object_name = f"documents/{uuid4().hex}_{Path(file_path).name}"
 
         self.client.upload_file(
             file_path,
             self.bucket_name,
-            object_name
+            object_name,
+            ExtraArgs={
+                "ContentType": content_type,
+                "ServerSideEncryption": "AES256",
+            },
         )
 
         return {
